@@ -71,7 +71,7 @@ class NewsCollector:
             display: 각 키워드당 검색 결과 개수
         
         Returns:
-            List[NewsArticle]: 중복 제거된 뉴스 기사 리스트
+            List[NewsArticle]: 중복 제거된 뉴스 기사 리스트 (국내 기사만)
         """
         all_articles = []
         seen_urls = set()
@@ -80,14 +80,56 @@ class NewsCollector:
             print(f"🔍 '{keyword}' 검색 중...")
             articles = self.search_news(keyword, display)
             
-            # 중복 제거
+            # 중복 제거 및 국내 기사만 필터링
             for article in articles:
-                if article.url not in seen_urls:
+                if article.url not in seen_urls and self._is_domestic_news(article):
                     all_articles.append(article)
                     seen_urls.add(article.url)
         
-        print(f"✅ 총 {len(all_articles)}개의 뉴스 기사 수집 완료")
+        print(f"✅ 총 {len(all_articles)}개의 국내 뉴스 기사 수집 완료")
         return all_articles
+    
+    @staticmethod
+    def _is_domestic_news(article: NewsArticle) -> bool:
+        """
+        국내 뉴스인지 확인
+        
+        Args:
+            article: 뉴스 기사
+        
+        Returns:
+            bool: 국내 뉴스 여부
+        """
+        # 한국 도메인 확인 (.kr, .co.kr 등)
+        korean_domains = ['.kr', 'naver.com', 'daum.net', 'chosun.com', 'joongang.co', 
+                         'donga.com', 'hani.co', 'khan.co', 'mt.co', 'hankyung.com',
+                         'mk.co', 'sbs.co', 'kbs.co', 'mbc.co', 'ytn.co', 'jtbc.co']
+        
+        url_lower = article.url.lower()
+        
+        # 한국 도메인 중 하나라도 포함되면 국내 뉴스로 판단
+        if any(domain in url_lower for domain in korean_domains):
+            return True
+        
+        # 제목이나 내용에 해외 국가명이 많이 포함되어 있으면 해외 뉴스로 판단
+        international_keywords = ['미국', '중국', '일본', '유럽', '영국', '프랑스', '독일', 
+                                 '러시아', 'USA', 'China', 'Japan', 'Europe', 'UK']
+        
+        text = (article.title + ' ' + article.description).lower()
+        korea_keywords = ['한국', '서울', '부산', '검찰', '법원', '금융감독원', '공정위', 
+                         '대법원', '헌재', '국회']
+        
+        # 한국 관련 키워드가 있으면 국내 뉴스로 판단
+        if any(keyword in text for keyword in korea_keywords):
+            return True
+        
+        # 해외 키워드가 많고 한국 키워드가 없으면 제외
+        international_count = sum(1 for keyword in international_keywords if keyword.lower() in text)
+        if international_count > 2:
+            return False
+        
+        # 기본적으로 포함 (네이버 뉴스는 대부분 국내 뉴스)
+        return True
     
     @staticmethod
     def _clean_html(text: str) -> str:
