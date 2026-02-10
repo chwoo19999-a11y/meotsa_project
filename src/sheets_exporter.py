@@ -44,13 +44,13 @@ class SheetsExporter:
             print(f"❌ 인증 실패: {e}")
             return False
     
-    def export_to_sheets(self, analyses: List[CompleteAnalysis], spreadsheet_name: str = None) -> str:
+    def export_to_sheets(self, analyses: List[CompleteAnalysis], spreadsheet_id: str = None) -> str:
         """
         분석 결과를 Google Sheets로 내보내기
         
         Args:
             analyses: 분석 결과 리스트
-            spreadsheet_name: 스프레드시트 이름 (None일 경우 자동 생성)
+            spreadsheet_id: 기존 스프레드시트 ID (None일 경우 새로 생성)
         
         Returns:
             str: 스프레드시트 URL
@@ -59,13 +59,28 @@ class SheetsExporter:
             return None
         
         try:
-            # 스프레드시트 생성
-            if spreadsheet_name is None:
+            # 기존 스프레드시트 열기 또는 새로 생성
+            if spreadsheet_id:
+                try:
+                    spreadsheet = self.client.open_by_key(spreadsheet_id)
+                    print(f"📂 기존 스프레드시트 열기: {spreadsheet.title}")
+                    
+                    # 새 시트 추가 (타임스탬프로 구분)
+                    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                    sheet_name = f"분석_{timestamp}"
+                    worksheet = spreadsheet.add_worksheet(title=sheet_name, rows="1000", cols="20")
+                    
+                except Exception as e:
+                    print(f"⚠️  기존 스프레드시트를 열 수 없습니다: {e}")
+                    print("💡 새 스프레드시트를 생성합니다.")
+                    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                    spreadsheet = self.client.create(f"소송금융_분석결과_{timestamp}")
+                    worksheet = spreadsheet.sheet1
+            else:
+                # 새 스프레드시트 생성
                 timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-                spreadsheet_name = f"소송금융_분석결과_{timestamp}"
-            
-            spreadsheet = self.client.create(spreadsheet_name)
-            worksheet = spreadsheet.sheet1
+                spreadsheet = self.client.create(f"소송금융_분석결과_{timestamp}")
+                worksheet = spreadsheet.sheet1
             
             # 헤더 작성
             headers = [

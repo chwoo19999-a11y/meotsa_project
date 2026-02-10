@@ -21,6 +21,9 @@ class Config:
     # Gemini API 설정
     GEMINI_API_KEY: str = os.getenv("GEMINI_API_KEY", "")
     
+    # Google Sheets ID (선택사항)
+    GOOGLE_SHEETS_ID: str = os.getenv("GOOGLE_SHEETS_ID", "")
+    
     # 검색 키워드 (OR 조건)
     SEARCH_KEYWORDS: List[str] = [
         "소송",

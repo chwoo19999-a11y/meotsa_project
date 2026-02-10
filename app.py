@@ -108,7 +108,7 @@ def export_to_sheets():
         
         # Google Sheets로 내보내기
         exporter = SheetsExporter()
-        url = exporter.export_to_sheets(analyses)
+        url = exporter.export_to_sheets(analyses, spreadsheet_id=Config.GOOGLE_SHEETS_ID)
         
         if url:
             # 요약 시트 추가
