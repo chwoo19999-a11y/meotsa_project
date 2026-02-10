@@ -15,7 +15,7 @@ class AIAnalyzer:
     
     def __init__(self):
         genai.configure(api_key=Config.GEMINI_API_KEY)
-        self.model = genai.GenerativeModel('gemini-1.5-flash')
+        self.model = genai.GenerativeModel('gemini-1.5-flash-latest')
     
     def analyze_article(self, article: NewsArticle) -> CompleteAnalysis:
         """
