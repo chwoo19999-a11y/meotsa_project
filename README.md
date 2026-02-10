@@ -40,29 +40,68 @@
 ### 필수 요구사항
 
 - Python 3.8 이상
-- 네이버 개발자 센터 API 키 (Client ID, Client Secret)
+# 소송금융 투자 적합도 분석 프로그램
 
-### 설치
+네이버 뉴스 API와 Gemini AI를 활용하여 소송금융 투자 적합성을 자동으로 분석하는 프로그램입니다.
+
+## 🎯 주요 기능
+
+- **자동 뉴스 수집**: 네이버 뉴스 API를 통해 소송 관련 뉴스 자동 수집
+- **AI 기반 분석**: Gemini AI를 활용한 투자 적합도 평가 (High/Medium/Low)
+- **구조화된 정보 추출**: 사건 분야, 상대방, 피해 규모, 진행 단계 자동 추출
+- **결과 저장**: JSON 형식으로 분석 결과 및 통계 저장
+
+## 📋 분석 기준
+
+### 적합 조건 (6가지)
+1. 상대방 책임이 비교적 명확함
+2. 상대방에게 자력이 충분함 (대기업, 금융기관, 공공기관 등)
+3. 집단적 피해 (수십 명 이상)
+4. 피해 규모가 큼 (수억 원 이상 또는 수만 명 이상)
+5. 증거가 있거나 확보 가능함
+6. 이미 공적 절차가 진행 중임
+
+### 등급 판정
+- **High**: 적합 조건 4개 이상, 부적합 조건 없음
+- **Medium**: 적합 조건 2~3개, 부적합 조건 없음
+- **Low**: 적합 조건 1개 이하 또는 부적합 조건 있음
+
+## 🚀 설치 및 설정
+
+### 1. 의존성 설치
 
 ```bash
-# 프로젝트 디렉토리로 이동
-cd meotsa_project
-
-# 가상환경 생성 및 활성화
-python -m venv venv
-source venv/bin/activate  # Windows: venv\Scripts\activate
-
-# 의존성 설치
 pip install -r requirements.txt
 ```
 
-### 환경 변수 설정
+### 2. API 키 발급
 
-`.env` 파일을 프로젝트 루트에 생성하고 다음 내용을 입력하세요:
+#### 네이버 뉴스 검색 API
+1. [네이버 개발자 센터](https://developers.naver.com/) 접속
+2. 애플리케이션 등록: [앱 등록 페이지](https://developers.naver.com/apps/#/register)
+3. 검색 API 선택 후 `Client ID`와 `Client Secret` 발급
 
-```env
-NAVER_CLIENT_ID=your_client_id_here
-NAVER_CLIENT_SECRET=your_client_secret_here
+#### Google Gemini API
+1. [Google AI Studio](https://aistudio.google.com/app/apikey) 접속
+2. API 키 발급
+
+### 3. 환경변수 설정
+
+`.env.example` 파일을 `.env`로 복사하고 API 키를 입력하세요:
+
+```bash
+# Windows
+copy .env.example .env
+
+# Linux/Mac
+cp .env.example .env
+```
+
+`.env` 파일 내용:
+```
+NAVER_CLIENT_ID=your_naver_client_id_here
+NAVER_CLIENT_SECRET=your_naver_client_secret_here
+GEMINI_API_KEY=your_gemini_api_key_here
 ```
 
 ### 네이버 API 키 발급 방법
