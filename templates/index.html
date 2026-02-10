@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>소송금융 투자 적합도 분석 대시보드</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+    <div class="container">
+        <!-- 헤더 -->
+        <header>
+            <h1>⚖️ 소송금융 투자 적합도 분석</h1>
+            <p>AI 기반 뉴스 분석 시스템</p>
+        </header>
+
+        <!-- 컨트롤 패널 -->
+        <section class="control-panel">
+            <button id="analyzeBtn" class="btn-primary">🚀 분석 시작</button>
+            <div id="progressBar" class="progress-bar hidden">
+                <div class="progress-fill"></div>
+                <span class="progress-text">0 / 0</span>
+            </div>
+            <p id="currentArticle" class="current-article hidden"></p>
+        </section>
+
+        <!-- 통계 카드 -->
+        <section id="statsSection" class="stats-section hidden">
+            <div class="stat-card high">
+                <h3>🔴 High</h3>
+                <p class="stat-number" id="statHigh">0</p>
+                <p class="stat-label">높은 적합도</p>
+            </div>
+            <div class="stat-card medium">
+                <h3>🟡 Medium</h3>
+                <p class="stat-number" id="statMedium">0</p>
+                <p class="stat-label">중간 적합도</p>
+            </div>
+            <div class="stat-card low">
+                <h3>🟢 Low</h3>
+                <p class="stat-number" id="statLow">0</p>
+                <p class="stat-label">낮은 적합도</p>
+            </div>
+        </section>
+
+        <!-- 필터 -->
+        <section id="filterSection" class="filter-section hidden">
+            <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+                <label for="gradeFilter">등급 필터:</label>
+                <select id="gradeFilter">
+                    <option value="all">전체</option>
+                    <option value="High">High</option>
+                    <option value="Medium">Medium</option>
+                    <option value="Low">Low</option>
+                </select>
+
+                <button id="exportSheetsBtn" class="btn-export">📊 Google Sheets로 내보내기</button>
+            </div>
+        </section>
+
+        <!-- 결과 테이블 -->
+        <section id="resultsSection" class="results-section hidden">
+            <h2>📊 분석 결과</h2>
+            <div class="table-container">
+                <table id="resultsTable">
+                    <thead>
+                        <tr>
+                            <th>등급</th>
+                            <th>제목</th>
+                            <th>사건 분야</th>
+                            <th>상대방</th>
+                            <th>피해 규모</th>
+                            <th>진행 단계</th>
+                            <th>상세</th>
+                        </tr>
+                    </thead>
+                    <tbody id="resultsBody">
+                        <!-- 동적으로 채워짐 -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- 상세 모달 -->
+        <div id="detailModal" class="modal hidden">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h2 id="modalTitle"></h2>
+                <div id="modalBody"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+
+</html>

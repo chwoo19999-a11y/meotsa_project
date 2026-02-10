@@ -1,0 +1,187 @@
+"""
+Google Sheets 내보내기 모듈
+Export analysis results to Google Sheets
+"""
+
+import gspread
+from google.oauth2.service_account import Credentials
+from typing import List
+from datetime import datetime
+from .models import CompleteAnalysis
+
+
+class SheetsExporter:
+    """Google Sheets로 분석 결과 내보내기"""
+    
+    def __init__(self, credentials_file: str = None):
+        """
+        Args:
+            credentials_file: Google 서비스 계정 JSON 파일 경로
+        """
+        self.credentials_file = credentials_file or 'credentials.json'
+        self.client = None
+    
+    def authenticate(self):
+        """Google Sheets API 인증"""
+        try:
+            scopes = [
+                'https://www.googleapis.com/auth/spreadsheets',
+                'https://www.googleapis.com/auth/drive'
+            ]
+            
+            creds = Credentials.from_service_account_file(
+                self.credentials_file, 
+                scopes=scopes
+            )
+            self.client = gspread.authorize(creds)
+            return True
+            
+        except FileNotFoundError:
+            print(f"❌ 인증 파일을 찾을 수 없습니다: {self.credentials_file}")
+            print("💡 Google Cloud Console에서 서비스 계정을 생성하고 JSON 키를 다운로드하세요.")
+            return False
+        except Exception as e:
+            print(f"❌ 인증 실패: {e}")
+            return False
+    
+    def export_to_sheets(self, analyses: List[CompleteAnalysis], spreadsheet_name: str = None) -> str:
+        """
+        분석 결과를 Google Sheets로 내보내기
+        
+        Args:
+            analyses: 분석 결과 리스트
+            spreadsheet_name: 스프레드시트 이름 (None일 경우 자동 생성)
+        
+        Returns:
+            str: 스프레드시트 URL
+        """
+        if not self.authenticate():
+            return None
+        
+        try:
+            # 스프레드시트 생성
+            if spreadsheet_name is None:
+                timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                spreadsheet_name = f"소송금융_분석결과_{timestamp}"
+            
+            spreadsheet = self.client.create(spreadsheet_name)
+            worksheet = spreadsheet.sheet1
+            
+            # 헤더 작성
+            headers = [
+                '등급', '제목', 'URL', '사건 분야', '상대방', 
+                '피해 금액', '피해자 수', '진행 단계', '진행 상세',
+                '요약', '판단 근거', '충족 조건', '분석 일시'
+            ]
+            worksheet.update('A1:M1', [headers])
+            
+            # 헤더 스타일 적용
+            worksheet.format('A1:M1', {
+                'backgroundColor': {'red': 0.4, 'green': 0.5, 'blue': 0.9},
+                'textFormat': {'bold': True, 'foregroundColor': {'red': 1, 'green': 1, 'blue': 1}},
+                'horizontalAlignment': 'CENTER'
+            })
+            
+            # 데이터 작성
+            rows = []
+            for analysis in analyses:
+                grade = analysis.analysis.suitability.grade
+                matched_conditions = '\n'.join(analysis.analysis.suitability.matched_conditions)
+                
+                row = [
+                    grade,
+                    analysis.title,
+                    analysis.url,
+                    analysis.analysis.case_field,
+                    analysis.analysis.defendant,
+                    analysis.analysis.damage_scale.amount,
+                    analysis.analysis.damage_scale.victim_count,
+                    analysis.analysis.progress_stage,
+                    analysis.analysis.progress_detail,
+                    analysis.analysis.summary,
+                    analysis.analysis.suitability.reasoning,
+                    matched_conditions,
+                    analysis.metadata.analyzed_at
+                ]
+                rows.append(row)
+            
+            # 데이터 일괄 업데이트
+            if rows:
+                worksheet.update(f'A2:M{len(rows)+1}', rows)
+                
+                # 등급별 색상 적용
+                for i, analysis in enumerate(analyses, start=2):
+                    grade = analysis.analysis.suitability.grade
+                    
+                    if grade == 'High':
+                        color = {'red': 1, 'green': 0.9, 'blue': 0.9}
+                    elif grade == 'Medium':
+                        color = {'red': 1, 'green': 0.96, 'blue': 0.9}
+                    else:  # Low
+                        color = {'red': 0.9, 'green': 0.97, 'blue': 0.9}
+                    
+                    worksheet.format(f'A{i}:M{i}', {'backgroundColor': color})
+            
+            # 열 너비 자동 조정
+            worksheet.columns_auto_resize(0, 12)
+            
+            # 공유 설정 (누구나 볼 수 있게)
+            spreadsheet.share('', perm_type='anyone', role='reader')
+            
+            url = spreadsheet.url
+            print(f"✅ Google Sheets 내보내기 완료!")
+            print(f"📊 URL: {url}")
+            
+            return url
+            
+        except Exception as e:
+            print(f"❌ Google Sheets 내보내기 실패: {e}")
+            import traceback
+            traceback.print_exc()
+            return None
+    
+    def export_summary(self, analyses: List[CompleteAnalysis], spreadsheet_url: str):
+        """
+        기존 스프레드시트에 요약 시트 추가
+        
+        Args:
+            analyses: 분석 결과 리스트
+            spreadsheet_url: 스프레드시트 URL
+        """
+        try:
+            spreadsheet = self.client.open_by_url(spreadsheet_url)
+            
+            # 요약 시트 생성
+            summary_sheet = spreadsheet.add_worksheet(title="요약", rows="100", cols="10")
+            
+            # 등급별 통계
+            stats = {'High': 0, 'Medium': 0, 'Low': 0}
+            for analysis in analyses:
+                grade = analysis.analysis.suitability.grade
+                stats[grade] = stats.get(grade, 0) + 1
+            
+            total = len(analyses)
+            
+            # 요약 데이터 작성
+            summary_data = [
+                ['📊 분석 요약', ''],
+                ['', ''],
+                ['총 분석 건수', total],
+                ['', ''],
+                ['🔴 High 등급', f"{stats['High']}건 ({stats['High']/total*100:.1f}%)"],
+                ['🟡 Medium 등급', f"{stats['Medium']}건 ({stats['Medium']/total*100:.1f}%)"],
+                ['🟢 Low 등급', f"{stats['Low']}건 ({stats['Low']/total*100:.1f}%)"],
+            ]
+            
+            summary_sheet.update('A1:B7', summary_data)
+            
+            # 스타일 적용
+            summary_sheet.format('A1:B1', {
+                'textFormat': {'bold': True, 'fontSize': 16},
+                'horizontalAlignment': 'CENTER'
+            })
+            
+            print("✅ 요약 시트 추가 완료!")
+            
+        except Exception as e:
+            print(f"❌ 요약 시트 추가 실패: {e}")
