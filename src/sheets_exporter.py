@@ -154,25 +154,43 @@ class SheetsExporter:
                     'textFormat': {'fontSize': 10}
                 })
                 
-                # 특정 열 너비 설정 (픽셀 단위)
-                set_column_width_requests = [
-                    {'range': 'A:A', 'pixelSize': 80},   # 등급
-                    {'range': 'B:B', 'pixelSize': 300},  # 제목
-                    {'range': 'C:C', 'pixelSize': 80},   # URL
-                    {'range': 'D:D', 'pixelSize': 100},  # 사건 분야
-                    {'range': 'E:E', 'pixelSize': 120},  # 상대방
-                    {'range': 'F:F', 'pixelSize': 100},  # 피해 금액
-                    {'range': 'G:G', 'pixelSize': 100},  # 피해자 수
-                    {'range': 'H:H', 'pixelSize': 100},  # 진행 단계
-                    {'range': 'I:I', 'pixelSize': 150},  # 진행 상세
-                    {'range': 'J:J', 'pixelSize': 250},  # 요약
-                    {'range': 'K:K', 'pixelSize': 200},  # 판단 근거
-                    {'range': 'L:L', 'pixelSize': 180},  # 충족 조건
-                    {'range': 'M:M', 'pixelSize': 120},  # 분석 일시
+                # 열 너비 설정 (batch_update 사용)
+                column_widths = [
+                    (0, 80),    # A: 등급
+                    (1, 300),   # B: 제목
+                    (2, 80),    # C: URL
+                    (3, 100),   # D: 사건 분야
+                    (4, 120),   # E: 상대방
+                    (5, 100),   # F: 피해 금액
+                    (6, 100),   # G: 피해자 수
+                    (7, 100),   # H: 진행 단계
+                    (8, 150),   # I: 진행 상세
+                    (9, 250),   # J: 요약
+                    (10, 200),  # K: 판단 근거
+                    (11, 180),  # L: 충족 조건
+                    (12, 120),  # M: 분석 일시
                 ]
                 
-                for col_request in set_column_width_requests:
-                    worksheet.set_column_width(col_request['range'], col_request['pixelSize'])
+                requests = []
+                for col_index, width in column_widths:
+                    requests.append({
+                        'updateDimensionProperties': {
+                            'range': {
+                                'sheetId': worksheet.id,
+                                'dimension': 'COLUMNS',
+                                'startIndex': col_index,
+                                'endIndex': col_index + 1
+                            },
+                            'properties': {
+                                'pixelSize': width
+                            },
+                            'fields': 'pixelSize'
+                        }
+                    })
+                
+                # 배치로 열 너비 적용
+                if requests:
+                    spreadsheet.batch_update({'requests': requests})
             
             # 공유 설정 (누구나 볼 수 있게)
             spreadsheet.share('', perm_type='anyone', role='reader')
@@ -200,8 +218,17 @@ class SheetsExporter:
         try:
             spreadsheet = self.client.open_by_url(spreadsheet_url)
             
+            # 요약 시트 이름 생성 (중복 방지)
+            summary_sheet_name = "요약"
+            existing_sheets = [ws.title for ws in spreadsheet.worksheets()]
+            
+            # 이미 "요약" 시트가 있으면 타임스탬프 추가
+            if summary_sheet_name in existing_sheets:
+                timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                summary_sheet_name = f"요약_{timestamp}"
+            
             # 요약 시트 생성
-            summary_sheet = spreadsheet.add_worksheet(title="요약", rows="100", cols="10")
+            summary_sheet = spreadsheet.add_worksheet(title=summary_sheet_name, rows="100", cols="10")
             
             # 등급별 통계
             stats = {'High': 0, 'Medium': 0, 'Low': 0}
@@ -230,7 +257,7 @@ class SheetsExporter:
                 'horizontalAlignment': 'CENTER'
             })
             
-            print("✅ 요약 시트 추가 완료!")
+            print(f"✅ 요약 시트 추가 완료! (시트명: {summary_sheet_name})")
             
         except Exception as e:
             print(f"❌ 요약 시트 추가 실패: {e}")
