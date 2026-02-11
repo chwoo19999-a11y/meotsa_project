@@ -4,7 +4,6 @@ Naver News API integration for collecting litigation-related articles
 """
 
 import requests
-from typing import List
 from bs4 import BeautifulSoup
 from .models import NewsArticle
 from .config import Config
@@ -18,7 +17,7 @@ class NewsCollector:
         self.client_secret = Config.NAVER_CLIENT_SECRET
         self.base_url = "https://openapi.naver.com/v1/search/news.json"
     
-    def search_news(self, keyword: str, display: int = 10) -> List[NewsArticle]:
+    def search_news(self, keyword: str, display: int = 10) -> list[NewsArticle]:
         """
         네이버 뉴스 검색
         
@@ -62,7 +61,7 @@ class NewsCollector:
             print(f"❌ 네이버 API 호출 실패: {e}")
             return []
     
-    def search_multiple_keywords(self, keywords: List[str], display: int = 10) -> List[NewsArticle]:
+    def search_multiple_keywords(self, keywords: list[str], display: int = 10) -> list[NewsArticle]:
         """
         여러 키워드로 뉴스 검색 (OR 조건)
         

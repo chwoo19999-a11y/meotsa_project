@@ -5,7 +5,6 @@ Export analysis results to Google Sheets
 
 import gspread
 from google.oauth2.service_account import Credentials
-from typing import List
 from datetime import datetime
 from .models import CompleteAnalysis
 
@@ -44,7 +43,7 @@ class SheetsExporter:
             print(f"❌ 인증 실패: {e}")
             return False
     
-    def export_to_sheets(self, analyses: List[CompleteAnalysis], spreadsheet_id: str = None) -> str:
+    def export_to_sheets(self, analyses: list[CompleteAnalysis], spreadsheet_id: str = None) -> str:
         """
         분석 결과를 Google Sheets로 내보내기
         
@@ -207,7 +206,7 @@ class SheetsExporter:
             traceback.print_exc()
             return None
     
-    def export_summary(self, analyses: List[CompleteAnalysis], spreadsheet_url: str):
+    def export_summary(self, analyses: list[CompleteAnalysis], spreadsheet_url: str):
         """
         기존 스프레드시트에 요약 시트 추가
         

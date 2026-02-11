@@ -4,7 +4,6 @@ Data models for news articles and analysis results
 """
 
 from datetime import datetime
-from typing import List, Optional
 from pydantic import BaseModel, Field
 
 
@@ -27,8 +26,8 @@ class SuitabilityEvaluation(BaseModel):
     """적합도 평가"""
     grade: str = Field(..., description="High|Medium|Low")
     reasoning: str = Field(..., description="판단 근거")
-    matched_conditions: List[str] = Field(default_factory=list, description="충족된 적합 조건")
-    unmatched_conditions: List[str] = Field(default_factory=list, description="미충족 조건")
+    matched_conditions: list[str] = Field(default_factory=list, description="충족된 적합 조건")
+    unmatched_conditions: list[str] = Field(default_factory=list, description="미충족 조건")
 
 
 class AnalysisResult(BaseModel):

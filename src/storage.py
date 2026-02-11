@@ -6,7 +6,6 @@ Storage manager for analysis results
 import json
 import os
 from datetime import datetime
-from typing import List
 from .models import CompleteAnalysis
 from .config import Config
 
@@ -24,7 +23,7 @@ class StorageManager:
             os.makedirs(self.output_dir)
             print(f"📁 출력 디렉토리 생성: {self.output_dir}")
     
-    def save_results(self, analyses: List[CompleteAnalysis], filename: str = None) -> str:
+    def save_results(self, analyses: list[CompleteAnalysis], filename: str = None) -> str:
         """
         분석 결과 저장
         
@@ -54,7 +53,7 @@ class StorageManager:
         print(f"💾 결과 저장 완료: {filepath}")
         return filepath
     
-    def save_summary(self, analyses: List[CompleteAnalysis], filename: str = None) -> str:
+    def save_summary(self, analyses: list[CompleteAnalysis], filename: str = None) -> str:
         """
         분석 요약 저장 (등급별 통계)
         
@@ -101,7 +100,7 @@ class StorageManager:
         print(f"📊 요약 저장 완료: {filepath}")
         return filepath
     
-    def print_summary(self, analyses: List[CompleteAnalysis]):
+    def print_summary(self, analyses: list[CompleteAnalysis]):
         """
         분석 결과 요약 출력
         

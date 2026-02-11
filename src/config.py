@@ -4,7 +4,6 @@ Configuration management for API keys and search parameters
 """
 
 import os
-from typing import List
 from dotenv import load_dotenv
 
 # .env 파일 로드
@@ -25,7 +24,7 @@ class Config:
     GOOGLE_SHEETS_ID: str = os.getenv("GOOGLE_SHEETS_ID", "")
     
     # 검색 키워드 (OR 조건)
-    SEARCH_KEYWORDS: List[str] = [
+    SEARCH_KEYWORDS: list[str] = [
         "소송",
         "손해배상",
         "집단소송",
