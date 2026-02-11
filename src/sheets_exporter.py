@@ -124,7 +124,9 @@ class SheetsExporter:
             if rows:
                 worksheet.update(f'A2:M{len(rows)+1}', rows)
                 
-                # 등급별 색상 적용
+                # 등급별 색상을 배치로 적용 (API 호출 최소화)
+                format_requests = []
+                
                 for i, analysis in enumerate(analyses, start=2):
                     grade = analysis.analysis.suitability.grade
                     
@@ -135,7 +137,14 @@ class SheetsExporter:
                     else:  # Low
                         color = {'red': 0.9, 'green': 0.97, 'blue': 0.9}
                     
-                    worksheet.format(f'A{i}:M{i}', {'backgroundColor': color})
+                    format_requests.append({
+                        'range': f'A{i}:M{i}',
+                        'format': {'backgroundColor': color}
+                    })
+                
+                # 한 번에 모든 포맷 적용 (배치 처리)
+                if format_requests:
+                    worksheet.batch_format(format_requests)
             
             # 열 너비 자동 조정
             worksheet.columns_auto_resize(0, 12)
