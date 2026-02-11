@@ -145,9 +145,34 @@ class SheetsExporter:
                 # 한 번에 모든 포맷 적용 (배치 처리)
                 if format_requests:
                     worksheet.batch_format(format_requests)
-            
-            # 열 너비 자동 조정
-            worksheet.columns_auto_resize(0, 12)
+                
+                # 텍스트 래핑 및 셀 크기 최적화
+                # 전체 데이터 범위에 텍스트 줄바꿈 적용
+                worksheet.format(f'A1:M{len(rows)+1}', {
+                    'wrapStrategy': 'WRAP',
+                    'verticalAlignment': 'TOP',
+                    'textFormat': {'fontSize': 10}
+                })
+                
+                # 특정 열 너비 설정 (픽셀 단위)
+                set_column_width_requests = [
+                    {'range': 'A:A', 'pixelSize': 80},   # 등급
+                    {'range': 'B:B', 'pixelSize': 300},  # 제목
+                    {'range': 'C:C', 'pixelSize': 80},   # URL
+                    {'range': 'D:D', 'pixelSize': 100},  # 사건 분야
+                    {'range': 'E:E', 'pixelSize': 120},  # 상대방
+                    {'range': 'F:F', 'pixelSize': 100},  # 피해 금액
+                    {'range': 'G:G', 'pixelSize': 100},  # 피해자 수
+                    {'range': 'H:H', 'pixelSize': 100},  # 진행 단계
+                    {'range': 'I:I', 'pixelSize': 150},  # 진행 상세
+                    {'range': 'J:J', 'pixelSize': 250},  # 요약
+                    {'range': 'K:K', 'pixelSize': 200},  # 판단 근거
+                    {'range': 'L:L', 'pixelSize': 180},  # 충족 조건
+                    {'range': 'M:M', 'pixelSize': 120},  # 분석 일시
+                ]
+                
+                for col_request in set_column_width_requests:
+                    worksheet.set_column_width(col_request['range'], col_request['pixelSize'])
             
             # 공유 설정 (누구나 볼 수 있게)
             spreadsheet.share('', perm_type='anyone', role='reader')
