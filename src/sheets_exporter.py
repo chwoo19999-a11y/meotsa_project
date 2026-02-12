@@ -85,12 +85,12 @@ class SheetsExporter:
             headers = [
                 '등급', '제목', 'URL', '사건 분야', '상대방', 
                 '피해 금액', '피해자 수', '진행 단계', '진행 상세',
-                '요약', '판단 근거', '충족 조건', '분석 일시'
+                '판단 근거', '충족 조건', '분석 일시'
             ]
-            worksheet.update('A1:M1', [headers])
+            worksheet.update('A1:L1', [headers])
             
             # 헤더 스타일 적용
-            worksheet.format('A1:M1', {
+            worksheet.format('A1:L1', {
                 'backgroundColor': {'red': 0.4, 'green': 0.5, 'blue': 0.9},
                 'textFormat': {'bold': True, 'foregroundColor': {'red': 1, 'green': 1, 'blue': 1}},
                 'horizontalAlignment': 'CENTER'
@@ -112,7 +112,6 @@ class SheetsExporter:
                     analysis.analysis.damage_scale.victim_count,
                     analysis.analysis.progress_stage,
                     analysis.analysis.progress_detail,
-                    analysis.analysis.summary,
                     analysis.analysis.suitability.reasoning,
                     matched_conditions,
                     analysis.metadata.analyzed_at
@@ -121,7 +120,7 @@ class SheetsExporter:
             
             # 데이터 일괄 업데이트
             if rows:
-                worksheet.update(f'A2:M{len(rows)+1}', rows)
+                worksheet.update(f'A2:L{len(rows)+1}', rows)
                 
                 # 등급별 색상을 배치로 적용 (API 호출 최소화)
                 format_requests = []
@@ -137,7 +136,7 @@ class SheetsExporter:
                         color = {'red': 0.9, 'green': 0.97, 'blue': 0.9}
                     
                     format_requests.append({
-                        'range': f'A{i}:M{i}',
+                        'range': f'A{i}:L{i}',
                         'format': {'backgroundColor': color}
                     })
                 
@@ -147,7 +146,7 @@ class SheetsExporter:
                 
                 # 텍스트 래핑 및 셀 크기 최적화
                 # 전체 데이터 범위에 텍스트 줄바꿈 적용
-                worksheet.format(f'A1:M{len(rows)+1}', {
+                worksheet.format(f'A1:L{len(rows)+1}', {
                     'wrapStrategy': 'WRAP',
                     'verticalAlignment': 'TOP',
                     'textFormat': {'fontSize': 10}
@@ -164,10 +163,9 @@ class SheetsExporter:
                     (6, 100),   # G: 피해자 수
                     (7, 100),   # H: 진행 단계
                     (8, 150),   # I: 진행 상세
-                    (9, 250),   # J: 요약
-                    (10, 200),  # K: 판단 근거
-                    (11, 180),  # L: 충족 조건
-                    (12, 120),  # M: 분석 일시
+                    (9, 200),   # J: 판단 근거
+                    (10, 180),  # K: 충족 조건
+                    (11, 120),  # L: 분석 일시
                 ]
                 
                 requests = []
