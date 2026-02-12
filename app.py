@@ -111,8 +111,6 @@ def export_to_sheets():
         url = exporter.export_to_sheets(analyses, spreadsheet_id=Config.GOOGLE_SHEETS_ID)
         
         if url:
-            # 요약 시트 추가
-            exporter.export_summary(analyses, url)
             return jsonify({'success': True, 'url': url}), 200
         else:
             return jsonify({'error': 'Google Sheets 내보내기 실패'}), 500
