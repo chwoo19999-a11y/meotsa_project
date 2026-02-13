@@ -16,6 +16,20 @@
             <p>AI 기반 뉴스 분석 시스템</p>
         </header>
 
+        <!-- 스케줄러 컨트롤 패널 -->
+        <section class="scheduler-panel">
+            <h3>⏰ 자동 수집 스케줄러 (60분 주기)</h3>
+            <div class="scheduler-controls">
+                <button id="startSchedulerBtn" class="btn-scheduler">🚀 자동 수집 시작</button>
+                <button id="stopSchedulerBtn" class="btn-scheduler" disabled>🛑 자동 수집 중지</button>
+            </div>
+            <div id="schedulerStatus" class="scheduler-status">
+                <p id="schedulerStateText">⚪ 대기 중</p>
+                <p id="lastRunText" class="scheduler-info">마지막 실행: 없음</p>
+                <p id="nextRunText" class="scheduler-info">다음 실행: 없음</p>
+            </div>
+        </section>
+
         <!-- 컨트롤 패널 -->
         <section class="control-panel">
             <button id="analyzeBtn" class="btn-primary">🚀 분석 시작</button>

@@ -13,6 +13,13 @@ const detailModal = document.getElementById('detailModal');
 const closeModal = document.querySelector('.close');
 const exportSheetsBtn = document.getElementById('exportSheetsBtn');
 
+// 스케줄러 요소
+const startSchedulerBtn = document.getElementById('startSchedulerBtn');
+const stopSchedulerBtn = document.getElementById('stopSchedulerBtn');
+const schedulerStateText = document.getElementById('schedulerStateText');
+const lastRunText = document.getElementById('lastRunText');
+const nextRunText = document.getElementById('nextRunText');
+
 // 통계 요소
 const statHigh = document.getElementById('statHigh');
 const statMedium = document.getElementById('statMedium');
@@ -20,6 +27,7 @@ const statLow = document.getElementById('statLow');
 
 // 상태 체크 타이머
 let statusCheckInterval = null;
+let schedulerStatusInterval = null;
 
 // 분석 시작
 analyzeBtn.addEventListener('click', async () => {
@@ -43,6 +51,46 @@ analyzeBtn.addEventListener('click', async () => {
             }
         } catch (error) {
             console.error('Error:', error);
+            alert('서버 오류가 발생했습니다.');
+        }
+    }
+});
+
+// 스케줄러 시작
+startSchedulerBtn.addEventListener('click', async () => {
+    if (confirm('자동 수집 스케줄러를 시작하시겠습니까?')) {
+        try {
+            const response = await fetch('/api/scheduler/start', { method: 'POST' });
+            const data = await response.json();
+
+            if (response.ok) {
+                alert(data.message);
+                updateSchedulerStatus();
+            } else {
+                alert(data.message || '스케줄러 시작 실패');
+            }
+        } catch (error) {
+            console.error('Scheduler start error:', error);
+            alert('서버 오류가 발생했습니다.');
+        }
+    }
+});
+
+// 스케줄러 중지
+stopSchedulerBtn.addEventListener('click', async () => {
+    if (confirm('자동 수집 스케줄러를 중지하시겠습니까?')) {
+        try {
+            const response = await fetch('/api/scheduler/stop', { method: 'POST' });
+            const data = await response.json();
+
+            if (response.ok) {
+                alert(data.message);
+                updateSchedulerStatus();
+            } else {
+                alert(data.message || '스케줄러 중지 실패');
+            }
+        } catch (error) {
+            console.error('Scheduler stop error:', error);
             alert('서버 오류가 발생했습니다.');
         }
     }
@@ -140,6 +188,43 @@ function updateProgress(data) {
 
         // 통계 업데이트
         updateStats(data.stats);
+    }
+}
+
+// 스케줄러 상태 업데이트
+async function updateSchedulerStatus() {
+    try {
+        const response = await fetch('/api/status');
+        const data = await response.json();
+
+        // 스케줄러 활성화 상태
+        if (data.scheduler_enabled) {
+            startSchedulerBtn.disabled = true;
+            stopSchedulerBtn.disabled = false;
+
+            // 수집 중인지 확인
+            if (data.is_running) {
+                schedulerStateText.textContent = '🔄 수집 중...';
+                schedulerStateText.className = 'collecting';
+            } else {
+                schedulerStateText.textContent = '🟢 실행 중';
+                schedulerStateText.className = 'active';
+            }
+        } else {
+            startSchedulerBtn.disabled = false;
+            stopSchedulerBtn.disabled = true;
+            schedulerStateText.textContent = '⚪ 대기 중';
+            schedulerStateText.className = '';
+        }
+
+        // 마지막 실행 시간
+        lastRunText.textContent = `마지막 실행: ${data.last_scheduled_run || '없음'}`;
+
+        // 다음 실행 시간
+        nextRunText.textContent = `다음 실행: ${data.next_scheduled_run || '없음'}`;
+
+    } catch (error) {
+        console.error('Scheduler status update error:', error);
     }
 }
 
@@ -256,4 +341,8 @@ window.addEventListener('load', async () => {
     } catch (error) {
         console.error('Initial load error:', error);
     }
+
+    // 스케줄러 상태 초기 업데이트 및 주기적 체크
+    updateSchedulerStatus();
+    schedulerStatusInterval = setInterval(updateSchedulerStatus, 3000);
 });
