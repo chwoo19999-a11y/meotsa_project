@@ -18,26 +18,37 @@
 
         <!-- 스케줄러 컨트롤 패널 -->
         <section class="scheduler-panel">
-            <h3>⏰ 자동 수집 스케줄러 (60분 주기)</h3>
+            <h3>⏰ 자동 수집 스케줄러 (300개 목표 → 자동 분석 → 시트 내보내기)</h3>
             <div class="scheduler-controls">
-                <button id="startSchedulerBtn" class="btn-scheduler">🚀 자동 수집 시작</button>
-                <button id="stopSchedulerBtn" class="btn-scheduler" disabled>🛑 자동 수집 중지</button>
+                <button id="startSchedulerBtn" class="btn-scheduler">🚀 300개 수집 시작</button>
+                <button id="stopSchedulerBtn" class="btn-scheduler" disabled>🛑 중지</button>
             </div>
             <div id="schedulerStatus" class="scheduler-status">
                 <p id="schedulerStateText">⚪ 대기 중</p>
-                <p id="lastRunText" class="scheduler-info">마지막 실행: 없음</p>
-                <p id="nextRunText" class="scheduler-info">다음 실행: 없음</p>
+                <p id="collectionProgress" class="scheduler-info">수집: 0 / 300</p>
+                <p id="lastRunText" class="scheduler-info">마지막 수집: 없음</p>
+                <p id="nextRunText" class="scheduler-info">다음 수집: 없음</p>
+            </div>
+            <!-- 수집 진행 바 -->
+            <div id="collectionBar" class="progress-bar hidden">
+                <div class="progress-fill"></div>
+                <span class="progress-text">0 / 300</span>
             </div>
         </section>
 
-        <!-- 컨트롤 패널 -->
+        <!-- 분석 진행 패널 -->
         <section class="control-panel">
-            <button id="analyzeBtn" class="btn-primary">🚀 분석 시작</button>
+            <div style="display: flex; gap: 10px; justify-content: center; align-items: center;">
+                <button id="analyzeBtn" class="btn-primary">🚀 수동 분석 시작</button>
+                <button id="stopAnalysisBtn" class="btn-scheduler" style="background: #e74c3c; display: none;">🛑 분석
+                    중단</button>
+            </div>
             <div id="progressBar" class="progress-bar hidden">
                 <div class="progress-fill"></div>
                 <span class="progress-text">0 / 0</span>
             </div>
             <p id="currentArticle" class="current-article hidden"></p>
+            <p id="phaseText" class="current-article hidden"></p>
         </section>
 
         <!-- 통계 카드 -->
