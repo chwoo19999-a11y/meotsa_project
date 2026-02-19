@@ -35,7 +35,8 @@ class Config:
     ]
     
     # 검색 옵션
-    SEARCH_DISPLAY: int = 10  # 검색 결과 개수
+    SEARCH_DISPLAY: int = 100  # 검색 결과 개수 (최대 100)
+    SEARCH_MAX_START: int = 300  # 페이지네이션 최대 시작 위치 (최대 1000)
     SEARCH_SORT: str = "date"  # 정렬 방식 (date: 최신순, sim: 관련도순)
     
     # 출력 디렉토리
