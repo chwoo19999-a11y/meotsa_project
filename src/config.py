@@ -42,6 +42,10 @@ class Config:
     # 출력 디렉토리
     OUTPUT_DIR: str = "output"
     
+    # 중복 판단 설정
+    TITLE_SIMILARITY_THRESHOLD: float = 0.8  # 제목 유사도 임계값 (0.0~1.0)
+    HISTORY_RETENTION_DAYS: int = 7  # 수집 이력 보관 일수
+    
     # 분석기 버전
     ANALYZER_VERSION: str = "1.0"
     
